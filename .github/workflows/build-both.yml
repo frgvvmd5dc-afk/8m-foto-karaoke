@@ -2,6 +2,7 @@ name: Windows und Mac herunterladen
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     tags: ['v*']
 jobs:
   windows:
