@@ -1,0 +1,30 @@
+name: Öffentliche Downloads bereitstellen
+on:
+  push:
+    branches: [release-publish]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Erfolgreich gebaute Dateien holen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh run download 44609448906 --repo "${{ github.repository }}" --dir downloads
+          mkdir release
+          cp downloads/8M-Windows-Installer-und-Portable/*.exe release/
+          cp downloads/8M-macOS-Apple-Silicon/8M-Foto-Karaoke-macOS.dmg release/8M-Foto-Karaoke-macOS-Apple-Silicon.dmg
+          cp downloads/8M-macOS-Intel/8M-Foto-Karaoke-macOS.dmg release/8M-Foto-Karaoke-macOS-Intel.dmg
+      - name: Dauerhafte Release-Links erstellen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh release create v1.0.0 release/* \
+            --repo "${{ github.repository }}" --target main \
+            --title "8M Foto Karaoke v1.0.0" \
+            --notes "Windows-Installer, portable Windows-Version und macOS für Apple Silicon und Intel. Die App benötigt keine hochgeladenen Fotos oder Videos. Pakete ohne digitale Signatur."
