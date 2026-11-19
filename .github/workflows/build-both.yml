@@ -51,3 +51,30 @@ jobs:
         with:
           name: 8M-macOS-${{ matrix.architecture }}
           path: dist/8M-Foto-Karaoke-macOS.dmg
+  release:
+    needs: [windows, mac]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: 8M-*
+          path: downloads
+      - name: Dateien für öffentliche Downloads benennen
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir release
+          cp downloads/8M-Windows-Installer-und-Portable/*.exe release/
+          cp downloads/8M-macOS-Apple-Silicon/8M-Foto-Karaoke-macOS.dmg release/8M-Foto-Karaoke-macOS-Apple-Silicon.dmg
+          cp downloads/8M-macOS-Intel/8M-Foto-Karaoke-macOS.dmg release/8M-Foto-Karaoke-macOS-Intel.dmg
+      - name: GitHub Release veröffentlichen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh release create "v1.0.${{ github.run_number }}" release/* \
+            --repo "${{ github.repository }}" \
+            --title "8M Foto Karaoke v1.0.${{ github.run_number }}" \
+            --notes "Windows-Installer, portable Windows-Version und macOS für Apple Silicon und Intel. Ohne digitale Signatur."
